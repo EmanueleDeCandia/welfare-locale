@@ -113,7 +113,14 @@ export default function EnrollForm({ profile, onDone, onBack }: Props) {
       </div>
 
       <label className="ob-privacy" data-error={errors.privacy ? "1" : "0"}>
-        <input type="checkbox" checked={privacy} onChange={(e) => setPrivacy(e.target.checked)} />
+        <input
+          type="checkbox"
+          checked={privacy}
+          onChange={(e) => {
+            setPrivacy(e.target.checked);
+            if (e.target.checked) setErrors((prev) => ({ ...prev, privacy: "" }));
+          }}
+        />
         <span>
           <ShieldCheck className="size-3.5" strokeWidth={2} />
           Accetto l'informativa privacy: i dati sono usati solo per l'attivazione del circuito di

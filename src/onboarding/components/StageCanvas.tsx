@@ -125,8 +125,9 @@ export default function StageCanvas({
         </div>
       )}
 
-      {/* etichette dei pilastri */}
-      <div className="ob-labels" data-phase={phase}>
+      {/* etichette dei pilastri — solo con il motore 3D attivo (posizionate dalla GPU) */}
+      {!failed && (
+        <div className="ob-labels" data-phase={phase}>
         {PROFILES.map((p, i) => (
           <button
             key={p.id}
@@ -146,8 +147,9 @@ export default function StageCanvas({
               <span className="ob-label-metric">{p.pillarMetric(params, results)}</span>
             </span>
           </button>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {failed && (
         <p className="ob-fallback-note">

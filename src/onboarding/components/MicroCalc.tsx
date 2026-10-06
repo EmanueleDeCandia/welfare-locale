@@ -12,9 +12,13 @@ interface Props {
 
 /* Micro-simulatore reattivo del profilo (SKILL §5.1) */
 export default function MicroCalc({ profile, params, results, scenario }: Props) {
-  const [local, setLocal] = useState(() => profile.micro.slider.default(params));
   const sliderId = useId();
   const s = profile.micro.slider;
+  // il valore parte dal parametro vivo del simulatore e resta agganciato ad esso
+  // finché l'utente non muove lo slider (poi prevale la scelta locale)
+  const [override, setOverride] = useState<number | null>(null);
+  const seeded = s.default(params);
+  const local = override ?? seeded;
   const rows = profile.micro.rows(params, results, local);
   const fill = ((local - s.min) / (s.max - s.min)) * 100;
 
@@ -51,7 +55,7 @@ export default function MicroCalc({ profile, params, results, scenario }: Props)
           max={s.max}
           step={s.step}
           value={local}
-          onChange={(e) => setLocal(Number(e.target.value))}
+          onChange={(e) => setOverride(Number(e.target.value))}
           style={{ "--fill": `${fill}%` } as React.CSSProperties}
         />
       </label>
