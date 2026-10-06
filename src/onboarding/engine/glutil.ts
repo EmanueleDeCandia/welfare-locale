@@ -7,6 +7,13 @@ export function compileShader(
   type: number,
   src: string
 ): WebGLShader {
+  // Guardia: senza `#version 300 es` come primissimo carattere il driver
+  // compila in GLSL ES 1.00 e rifiuta `out`, `in` e `gl_VertexID`.
+  if (!src.startsWith("#version 300 es")) {
+    throw new Error(
+      "Shader senza intestazione '#version 300 es': verrebbe compilato come GLSL ES 1.00"
+    );
+  }
   const sh = gl.createShader(type)!;
   gl.shaderSource(sh, src);
   gl.compileShader(sh);

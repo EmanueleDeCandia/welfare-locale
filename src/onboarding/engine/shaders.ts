@@ -1,12 +1,10 @@
-import { CURL, ENVIRONMENT, FBM, SIMPLEX_3D, UTILS } from "./glsl";
+import { CURL, ENVIRONMENT, FBM, HEAD, SIMPLEX_3D, UTILS } from "./glsl";
 
 /* ------------------------------------------------------------------ */
 /*  Shader dell'esperienza di Onboarding 3D                            */
 /*  Pipeline: volumetric → scene (instanced + morph + particles) →      */
 /*            bloom → composite (FXAA-lite, CA, vignette, grain)        */
 /* ------------------------------------------------------------------ */
-
-const HEAD = "#version 300 es\n";
 
 /* ---------------- volumetric raymarching (vapore / fumo) ---------------- */
 

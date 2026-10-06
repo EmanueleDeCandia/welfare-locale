@@ -32,6 +32,7 @@ export default function StageCanvas({
   const selectRef = useRef(onSelect);
   selectRef.current = onSelect;
   const [failed, setFailed] = useState(false);
+  const [failReason, setFailReason] = useState<string | null>(null);
   const [rm, setRm] = useState(
     () =>
       typeof window !== "undefined" &&
@@ -54,6 +55,7 @@ export default function StageCanvas({
     if (!canvas) return;
     const engine = OnboardingEngine.create(canvas, {
       reducedMotion: rm,
+      onFail: setFailReason,
       callbacks: {
         onPicked: (i) => selectRef.current(i),
         onLabels: (labels: PillarLabel[]) => {
@@ -153,8 +155,11 @@ export default function StageCanvas({
 
       {failed && (
         <p className="ob-fallback-note">
-          WebGL2 non disponibile su questo dispositivo: l'esperienza continua in modalità
-          compatibile, con dati e calcoli sempre attivi.
+          {failReason === "webgl2-non-disponibile"
+            ? "Questo browser o questa scheda grafica non espongono WebGL2: la scena 3D non può partire. Dati, micro-calcolatori e iscrizione restano comunque attivi."
+            : failReason === "contesto-perso"
+              ? "Il contesto grafico è andato perdito: ricarica la pagina per riavviare la scena 3D."
+              : `Avvio del motore 3D non riuscito (${failReason ?? "motivo sconosciuto"}). Dati, micro-calcolatori e iscrizione restano comunque attivi.`}
         </p>
       )}
     </div>

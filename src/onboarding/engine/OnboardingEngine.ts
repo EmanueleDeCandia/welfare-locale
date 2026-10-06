@@ -55,6 +55,8 @@ export interface EngineCallbacks {
 
 export interface EngineOptions {
   reducedMotion: boolean;
+  /** motivo dell'avvio fallito, per mostrarlo nell'interfaccia di ripiego */
+  onFail?: (reason: string) => void;
   callbacks?: EngineCallbacks;
 }
 
@@ -205,11 +207,21 @@ export class OnboardingEngine {
       powerPreference: "high-performance",
       preserveDrawingBuffer: false,
     });
-    if (!gl) return null;
+    if (!gl) {
+      console.warn("[Onboarding3D] WebGL2 non disponibile su questo dispositivo");
+      opts.onFail?.("webgl2-non-disponibile");
+      return null;
+    }
+    if (gl.isContextLost()) {
+      console.warn("[Onboarding3D] contesto WebGL2 già perso");
+      opts.onFail?.("contesto-perso");
+      return null;
+    }
     try {
       return new OnboardingEngine(canvas, gl, opts);
     } catch (err) {
       console.warn("[Onboarding3D] inizializzazione fallita:", err);
+      opts.onFail?.(err instanceof Error ? err.message : String(err));
       return null;
     }
   }
@@ -446,8 +458,11 @@ export class OnboardingEngine {
     deleteRenderTarget(gl, this.bloomB);
     if (this.depthRb) gl.deleteRenderbuffer(this.depthRb);
     deleteTargetTexture(gl, this.targets);
-    const lose = gl.getExtension("WEBGL_lose_context");
-    lose?.loseContext();
+    this.textSpec = null;
+    // Non chiamare WEBGL_lose_context.loseContext(): il contesto verrebbe perso
+    // per sempre e un successivo mount sullo stesso canvas (StrictMode in dev,
+    // rientro dall'onboarding) otterrebbe un contesto morto. Cancellare le
+    // risorse GL è sufficiente e lascia il canvas riutilizzabile.
   }
 
   /* ------------------------------ dimensioni ------------------------------ */

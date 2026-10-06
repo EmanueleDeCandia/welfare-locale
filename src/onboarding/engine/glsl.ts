@@ -3,6 +3,15 @@
 /*  (SKILL §3.2: Simplex Noise / Perlin FBM per shader volumetrici)    */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Intestazione obbligatoria di OGNI shader. La direttiva `#version` deve essere
+ * il primissimo carattere del sorgente: senza di essa il driver compila in
+ * GLSL ES 1.00, dove `out`, `in` e `gl_VertexID` non esistono e la
+ * compilazione fallisce. Vivere qui (e non in shaders.ts) evita un import
+ * circolare: i chunk di glsl.ts sono interpolati dentro gli shader.
+ */
+export const HEAD = "#version 300 es\n";
+
 /** Simplex noise 3D (Ashima Arts / Stefan Gustavson, MIT). */
 export const SIMPLEX_3D = /* glsl */ `
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -155,7 +164,8 @@ vec3 hash32(vec2 p) {
 `;
 
 /** VS fullscreen: triangolo che copre il viewport senza vertex buffer. */
-export const FULLSCREEN_VS = /* glsl */ `
+export const FULLSCREEN_VS = HEAD + /* glsl */ `
+precision highp float;
 out vec2 vNdc;
 void main() {
   vec2 p = vec2((gl_VertexID == 1) ? 3.0 : -1.0, (gl_VertexID == 2) ? 3.0 : -1.0);
