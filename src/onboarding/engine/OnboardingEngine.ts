@@ -64,6 +64,7 @@ const RING_R_DESKTOP = 16.5;
 const RING_R_MOBILE = 10.5;
 
 const DEFAULT_ACCENT = "#e2a63d";
+const UP = v3(0, 1, 0);
 
 const MONO_LAYOUT = [
   { loc: 3, size: 3, offset: 0 },
@@ -126,6 +127,7 @@ export class OnboardingEngine {
 
   /* geometria adattiva (calcolata dal aspect ratio del viewport) */
   private ringR = RING_R_DESKTOP;
+  private pillarTmp: Vec3 = v3(0, 0, 0);
   private pillarAngles = [-1.05, -0.525, 0, 0.525, 1.05];
 
   /* camera & matrici */
@@ -582,10 +584,19 @@ export class OnboardingEngine {
     this.simulateParticles(dt);
   }
 
+  /**
+   * Posizione del pilastro i. Scrive in un buffer riusato: il motore non deve
+   * allocare nel percorso per-frame (SKILL §6.1). Nessun chiamante trattiene
+   * il riferimento restituito oltre l'iterazione corrente.
+   */
   private pillarPos(i: number): Vec3 {
     const a = this.pillarAngles[i] ?? 0;
     const h = BASE_H * (0.55 + 0.9 * this.pillarH[i]);
-    return v3(Math.sin(a) * this.ringR, h * 0.5, Math.cos(a) * this.ringR);
+    const out = this.pillarTmp;
+    out.x = Math.sin(a) * this.ringR;
+    out.y = h * 0.5;
+    out.z = Math.cos(a) * this.ringR;
+    return out;
   }
 
   private pillarColors: [number, number, number][] = (
@@ -678,7 +689,7 @@ export class OnboardingEngine {
 
     const aspect = this.width / this.height;
     perspective(this.proj, 0.82, aspect, 0.1, 120);
-    lookAt(this.view, this.rig.eye, this.rig.target, v3(0, 1, 0));
+    lookAt(this.view, this.rig.eye, this.rig.target, UP);
     multiply(this.viewProj, this.proj, this.view);
     if (invert(this.invViewProj, this.viewProj) === null) this.invViewProj = this.viewProj;
 
