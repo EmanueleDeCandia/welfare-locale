@@ -6,6 +6,7 @@ const LINKS = [
   { href: "#ecosistema", label: "Ecosistema" },
   { href: "#simulatore", label: "Simulatore" },
   { href: "#leve", label: "Leve 3D" },
+  { href: "#onboarding", label: "Onboarding 3D" },
 ];
 
 export default function Nav() {

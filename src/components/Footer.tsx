@@ -1,4 +1,4 @@
-import { Coffee, ArrowUp, FileText, Layers, BarChart3, Orbit } from "lucide-react";
+import { Coffee, ArrowUp, FileText, Layers, BarChart3, Orbit, UserPlus } from "lucide-react";
 
 const COLS = [
   {
@@ -8,6 +8,7 @@ const COLS = [
       { label: "Ecosistema a 5 attori", href: "#ecosistema", icon: Layers },
       { label: "Simulatore interattivo", href: "#simulatore", icon: BarChart3 },
       { label: "Le 8 leve in 3D", href: "#leve", icon: Orbit },
+      { label: "Onboarding 3D partecipanti", href: "#onboarding", icon: UserPlus },
     ],
   },
 ];

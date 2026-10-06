@@ -247,6 +247,31 @@ input[type="range"].param-range:active::-webkit-slider-thumb {
   }
 }
 
+
+/* ---------- handoff GIRA ORA → Onboarding 3D ---------- */
+@keyframes handoffIn {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.handoff-glow {
+  position: absolute;
+  inset: auto -30% -60% auto;
+  right: -30%;
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  background: var(--accent, #e2a63d);
+  opacity: 0.12;
+  filter: blur(70px);
+  pointer-events: none;
+}
+
 /* ---------- section eyebrow rule ---------- */
 .rule {
   height: 1px;

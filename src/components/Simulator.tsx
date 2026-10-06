@@ -23,15 +23,10 @@ import {
   Rocket,
   BookOpenCheck,
 } from "lucide-react";
-import {
-  DEFAULT_PARAMS,
-  PRESETS,
-  computeResults,
-  type Params,
-  type ScenarioKey,
-} from "../lib/model";
+import { computeResults, type Params, type ScenarioKey } from "../lib/model";
 import { fmtInt, fmtEUR, fmtDec } from "../lib/model";
 import { useCountUp } from "../lib/hooks";
+import { useSimState, setSimParam, applySimScenario } from "../lib/store";
 import { Reveal, SectionTitle } from "../lib/ui";
 import ParamsPanel from "./ParamsPanel";
 import { GrowthChart, ValueDonut } from "./Charts";
@@ -226,22 +221,15 @@ const SCENARIOS: { key: ScenarioKey; label: string }[] = [
 ];
 
 export default function Simulator() {
-  const [params, setParams] = useState<Params>(DEFAULT_PARAMS);
-  const [scenario, setScenario] = useState<ScenarioKey | "custom">("realistico");
+  const { params, scenario } = useSimState();
   const [copied, setCopied] = useState(false);
   const [openMetodo, setOpenMetodo] = useState<number | null>(1);
 
   const results = useMemo(() => computeResults(params), [params]);
 
-  const update = (key: keyof Params, value: number) => {
-    setParams((p) => ({ ...p, [key]: value }));
-    setScenario("custom");
-  };
+  const update = (key: keyof Params, value: number) => setSimParam(key, value);
 
-  const applyScenario = (key: ScenarioKey) => {
-    setParams({ ...DEFAULT_PARAMS, ...PRESETS[key] });
-    setScenario(key);
-  };
+  const applyScenario = (key: ScenarioKey) => applySimScenario(key);
 
   const copyParams = async () => {
     const payload = JSON.stringify(

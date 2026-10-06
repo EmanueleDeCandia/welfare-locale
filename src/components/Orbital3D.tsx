@@ -13,12 +13,14 @@ import {
   RotateCw,
   Undo2,
   Dices,
+  Orbit,
   MousePointer2,
   MoveVertical,
   Hand,
   Crosshair,
 } from "lucide-react";
 import { useViewportWidth } from "../lib/hooks";
+import { setHandoff } from "../lib/store";
 import { Reveal, SectionTitle } from "../lib/ui";
 
 const STEP = 45;
@@ -194,6 +196,7 @@ export default function Orbital3D() {
   const last = useRef({ x: 0, y: 0 });
   const roulette = useRef<null | { from: number; to: number; start: number; dur: number }>(null);
   const activeRef = useRef(0);
+  const handoffArmed = useRef(false);
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -211,6 +214,17 @@ export default function Orbital3D() {
         if (t >= 1) {
           roulette.current = null;
           setSpinning(false);
+          // handoff event-driven: solo all'arresto della decelerazione
+          if (handoffArmed.current) {
+            handoffArmed.current = false;
+            const finalIdx = mod(Math.round(-rot.current / STEP), CARDS.length);
+            setHandoff({
+              cardIndex: finalIdx,
+              accent: CARDS[finalIdx].accent,
+              title: CARDS[finalIdx].title,
+              at: performance.now(),
+            });
+          }
         }
       } else if (!dragging.current) {
         rot.current += vel.current;
@@ -341,6 +355,7 @@ export default function Orbital3D() {
                 onClick={() => {
                   let idx = activeIndex;
                   while (idx === activeIndex) idx = Math.floor(Math.random() * CARDS.length);
+                  handoffArmed.current = true;
                   goTo(idx, 2, 3600);
                 }}
                 disabled={spinning}
@@ -618,10 +633,21 @@ export default function Orbital3D() {
           </div>
         </Reveal>
 
-        <p className="mt-6 text-center text-[11px] text-sand/70">
-          * Valori sul retro delle carte calcolati sullo scenario realistico — passa al simulatore
-          per ricalcolarli con i tuoi parametri.
-        </p>
+        <Reveal delay={120}>
+          <div className="mt-6 flex flex-col items-center gap-3">
+            <a
+              href="#onboarding"
+              className="group inline-flex items-center gap-2.5 rounded-full border border-brass/40 bg-brass/10 px-6 py-3 text-[13px] font-semibold text-brass2 transition-all hover:border-brass hover:bg-brass/20 hover:shadow-[0_8px_40px_-8px_rgba(226,166,61,0.5)]"
+            >
+              <Orbit className="size-4 transition-transform duration-700 group-hover:rotate-180" />
+              Onboarding 3D · iscrivi un partecipante al circuito
+            </a>
+            <p className="text-center text-[11px] text-sand/70">
+              * Valori sul retro delle carte calcolati sullo scenario realistico — passa al
+              simulatore per ricalcolarli con i tuoi parametri.
+            </p>
+          </div>
+        </Reveal>
       </div>
     </section>
   );
