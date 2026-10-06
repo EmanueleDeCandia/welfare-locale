@@ -166,6 +166,8 @@ export class OnboardingEngine {
 
   /* target particellari */
   private targets: TargetTexture | null = null;
+  private textSpec: { lines: TargetLine[]; accent: string } | null = null;
+  private textK = 0;
 
   /* loop & dimensioni */
   private raf = 0;
@@ -322,6 +324,12 @@ export class OnboardingEngine {
       this.morph01T = 0;
       this.morph12T = 0;
       this.accentRgbT = hexToRgb(DEFAULT_ACCENT);
+      // nel profilatore il testo in coalescenza non serve: libera la texture
+      if (this.targets) {
+        deleteTargetTexture(this.gl, this.targets);
+        this.targets = null;
+      }
+      this.textSpec = null;
       this.setMode(0);
       this.rig.flyTo(this.rig.theta, 0.34, 31, v3(0, 2.2, 0), rm ? 0.5 : 1.6);
       return;
@@ -343,17 +351,8 @@ export class OnboardingEngine {
       this.accentRgbT = rgb;
       this.surgeRgb = rgb;
       this.surgeOrigin = v3(pillar.x, pillar.y, pillar.z);
-      const aspect = this.width / Math.max(this.height, 1);
-      const k = Math.min(1, Math.max(0.45, aspect));
-      const next = createTargetTexture(
-        this.gl,
-        text.lines,
-        text.accent,
-        13.5 * k,
-        6.4 * k
-      );
-      if (this.targets) deleteTargetTexture(this.gl, this.targets);
-      this.targets = next;
+      this.textSpec = { lines: text.lines, accent: text.accent };
+      this.rebuildTargetTexture();
       this.setMode(1);
       this.triggerSurge();
     }
@@ -453,6 +452,23 @@ export class OnboardingEngine {
 
   /* ------------------------------ dimensioni ------------------------------ */
 
+  /**
+   * Rigenera la texture verso cui coalescono le particelle. La larghezza in
+   * unità di mondo dipende dall'aspect ratio: va rifatta quando il viewport
+   * cambia forma (rotazione del dispositivo, resize della finestra).
+   */
+  private rebuildTargetTexture() {
+    const spec = this.textSpec;
+    if (!spec) return;
+    const aspect = this.width / Math.max(this.height, 1);
+    const k = Math.min(1, Math.max(0.45, aspect));
+    if (this.targets && Math.abs(k - this.textK) < 0.02) return;
+    const next = createTargetTexture(this.gl, spec.lines, spec.accent, 13.5 * k, 6.4 * k);
+    if (this.targets) deleteTargetTexture(this.gl, this.targets);
+    this.targets = next;
+    this.textK = k;
+  }
+
   private resize() {
     const parent = this.canvas.parentElement;
     const w = Math.max(1, Math.floor(parent?.clientWidth ?? this.canvas.clientWidth));
@@ -474,6 +490,7 @@ export class OnboardingEngine {
     this.ringR = aspect < 0.85 ? RING_R_MOBILE : RING_R_DESKTOP;
 
     this.rebuildTargets();
+    this.rebuildTargetTexture();
   }
 
   private rebuildTargets() {
